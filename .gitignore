@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+/build/html/_static
+/build/html/_images
+/build/html

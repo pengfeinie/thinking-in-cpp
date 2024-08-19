@@ -57,10 +57,6 @@ html_context = {
 	"github_version":"main/source/"
 }
 
-html_theme_options = {
-    'show_subtitles': False
-}
-
 # -- Options for PDF output --------------------------------------------------
 
 pdf_documents = [

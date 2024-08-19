@@ -3,11 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to thinking-in-pcie's documentation!
+Welcome to thinking-in-cpp's documentation!
 ============================================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: Contents:
    
    剖析原理/index

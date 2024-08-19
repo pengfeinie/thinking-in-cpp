@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'thinking-in-pcie'
+project = 'thinking-in-cpp'
 copyright = '2023, pfnie'
 author = 'pfnie'
 
@@ -53,7 +53,7 @@ exclude_patterns = []
 html_context = {
 	"display_github": True,
 	"github_user":"pengfeinie",
-	"github_repo":"thinking-in-pcie",
+	"github_repo":"thinking-in-cpp",
 	"github_version":"main/source/"
 }
 
@@ -64,7 +64,7 @@ html_theme_options = {
 # -- Options for PDF output --------------------------------------------------
 
 pdf_documents = [
-    ('index', 'thinking-in-cpp', 'thinking-in-pcie', 'pfnie'),
+    ('index', 'thinking-in-cpp', 'thinking-in-cpp', 'pfnie'),
 ]
 
 pdf_stylesheets = ['sphinx', 'kerning', 'a4']

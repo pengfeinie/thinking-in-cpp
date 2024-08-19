@@ -57,10 +57,14 @@ html_context = {
 	"github_version":"main/source/"
 }
 
+html_theme_options = {
+    'show_subtitles': False
+}
+
 # -- Options for PDF output --------------------------------------------------
 
 pdf_documents = [
-    ('index', 'thinking-in-pcie', 'thinking-in-pcie', 'pfnie'),
+    ('index', 'thinking-in-cpp', 'thinking-in-pcie', 'pfnie'),
 ]
 
 pdf_stylesheets = ['sphinx', 'kerning', 'a4']

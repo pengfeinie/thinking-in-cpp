@@ -151,7 +151,7 @@ int main()
 
 main定义Base类对象b，把&b转成`int*`，取得虚函数表的地址vtptr就是：`(int*)(&b)`，然后再解引用并强转成`int*`得到第一个虚函数的地址，也就是Base::f()即`(int*)(*((int*)&b))+0`，那么，第二个虚函数g()的地址就是`(int*)(*((int*)&t)) + 1`，依次类推。
 
-<video width="800" height="600">     <source src="https://pengfeinie.github.io/images/video/thinking_in_cpp/info_vtbl.mp4" type="video/mp4"> </video>
+<video width="700" height="600" controls>     <source src="https://pengfeinie.github.io/images/video/thinking_in_cpp/info_vtbl.mp4" type="video/mp4"> </video>
 
 编译器为每个对象提供一个虚表指针vptr，这个指针指向`对象所属类`的虚表。在程序运行时，根据对象的类型去初始化vptr，从而让vptr正确的指向所属类的虚表，从而在调用虚函数时，就能够找到正确的函数。
 

@@ -1,4 +1,4 @@
-# 强制类型转换
+# 第7章 强制类型转换
 
 强制类型转换，也称为显式转换，C++中强制类型转换操作符有static_cast、dynamic_cast、const_cast、reinterpert_cast。
 

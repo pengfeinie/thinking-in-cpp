@@ -1,19 +1,24 @@
 # 强制类型转换
 
-强制类型转换，也称为显式转换，C++中强制类型转换操作符有static_cast、dynamic_cast、const_cast、reinterpert_cast四个。
+强制类型转换，也称为显式转换，C++中强制类型转换操作符有static_cast、dynamic_cast、const_cast、reinterpert_cast。
 
-## static_cast
+## 1. static_cast
 
 This is the simplest type of cast that can be used. It is a **compile-time cast**. It does things like implicit conversions between types (such as int to float, or pointer to void*), and it can also call explicit conversion functions.
 
 语法 ：static_cast< 想要的类型> (原数据)， 是C++中的关键字。
--------在C++中，我们经常用到隐式的类型转换，比如 char->int , int ->double, 类层次结构中基类和派生类之间指针或引用的转换。
--------编译器隐式执行的任何类型转换都可以由static_cast显式完成。
--------需要注意的是，我们要确保目标数据类型是我们想要的类型，因为static_cast 不做运行时的类型检查RTTI。
--------相当于C语言的强制类型转换，static_cast 会做编译时的类型检查，但C语言的强制类型转换不会做编译时的类型检查。
------- 不能更改数据 const , static 等属性。
 
-### 基本数据类型转换
+- 隐式类型转换，比如 char->int , 类层次结构中基类和派生类之间指针或引用的转换。
+
+- 编译器隐式执行的任何类型转换都可以由static_cast显式完成。
+
+- 我们要确保目标数据类型是我们想要的类型，因为static_cast 不做运行时的类型检查RTTI。
+
+- static_cast 会做编译时的类型检查，但C语言的强制类型转换不会做编译时的类型检查。
+
+- 不能更改数据 const , static 等属性。
+
+### 1.1 基本数据类型转换
 
 ```c++
 #include <iostream>
@@ -30,7 +35,7 @@ int main()
 }
 ```
 
-### **static_cast for primitive data type pointers**
+### 1.2 **for primitive data type pointers**
 
 ```c++
 #include <iostream>
@@ -47,15 +52,18 @@ int main()
 }
 ```
 
-### static_cast for Inheritance
+### 1.3 for Inheritance
 
 static_cast can provide both upcasting and downcasting in case of inheritance. The following example demonstrates the use of static_cast in the case of upcasting.
 
-用于类层次结构中基类和派生类之间指针或引用的转换。
+- 用于类层次结构中基类和派生类之间指针或引用的转换。
 
-进行上行转换（把派生类的指针或引用转换成基类表示）是**安全**的；
 
-进行下行转换（把基类指针或引用转换成派生类表示）时，由于没有动态类型检查，所以是**不安全**的。
+- 进行上行转换（把派生类的指针或引用转换成基类表示）是**安全**的；
+
+
+- 进行下行转换（把基类指针或引用转换成派生类表示）是**不安全**的。
+
 
 static_cast用在于基类与派生类指针或引用类型之间的转换，然而它不做运行时的检查，不如dynamic_cast安全。static_cast仅仅是依靠类型转换语句中提供的信息来进行转换，而dynamic_cast则会遍历整个类继承体系进行类型检查，因此dynamic_cast在执行效率上比static_cast要差一些。
 
@@ -69,22 +77,22 @@ class Derived : public Base {};
 
 int main()
 {
-	Derived d1;
-     // Implicit cast allowed
+    Derived d1;
+    // Implicit cast allowed
     Base* b1 = (Base*)(&d1);
-	// upcasting using static_cast
-	Base* b2 = static_cast<Base*>(&d1);
+    // upcasting using static_cast
+    Base* b2 = static_cast<Base*>(&d1);
     
     Base b3;
     // Implicit cast allowed
     Derived* d2 = (Derived*)(&b3);
     // downcasting using static_cast
-	Derived* d3 = static_cast<Derived*>(&b3);
-	return 0;
+    Derived* d3 = static_cast<Derived*>(&b3);
+    return 0;
 }
 ```
 
-### static_cast to Cast ‘to and from’ Void Pointer
+### 1.4 cast ‘to and from’ Void Pointer
 
 static_cast operator allows casting from any pointer type to void pointer and vice versa.
 
@@ -101,27 +109,29 @@ int main()
 }
 ```
 
-## dynamic_cast
+## 2. dynamic_cast
 
-dynamic_cast是四个强制类型转换操作符中最特殊的一个，**它支持运行时识别指针或引用**。首先，dynamic_cast依赖于RTTI信息，其次，在转换时，dynamic_cast会检查转换的source对象是否真的可以转换成target类型，这种检查不是语法上的，而是真实情况的检查。
+dynamic_cast是四个强制类型转换操作符中最特殊的一个，**它支持运行时识别指针或引用**。首先，dynamic_cast依赖于RTTI信息，其次，在转换时，dynamic_cast会检查转换的source对象是否真的可以转换成target类型，这种检查不是语法上的，而是真实情况的检查。基类必须具有虚函数。dynamic_cast是运行时类型信息（RTTI），而这个信息是存储与类的虚函数表关系紧密的信息，只有一个类定义了虚函数，才会有虚函数表。运行时检查，转型不成功则返回一个空指针，非必要不使用dynamic_cast，因为有额外的开销。
 
-（1）用于具有虚函数的基类与派生类之间的指针或引用的转换。
-（2）基类必须具有虚函数。dynamic_cast是运行时类型信息（RTTI），而这个信息是存储与类的虚函数表关系紧密的信息，只有一个类定义了虚函数，才会有虚函数表。运行时检查，转型不成功则返回一个空指针，非必要不使用dynamic_cast，因为有额外的开销。
-（3）常用的转换方式
-基类指针或引用 转 派生类指针（必须使用dynamic_cast）
-派生类指针或引用 转 基类指针（可以使用dynamic_cast，但是更推荐用static_cast）
+- 用于具有虚函数的基类与派生类之间的指针或引用的转换。
 
-### dynamic_cast主要用于“安全地向下转型”
+- 基类指针或引用 转 派生类指针（必须使用dynamic_cast）
+- 派生类指针或引用 转 基类指针（可以使用dynamic_cast，但是更推荐用static_cast）
+
+### 2.1 用于“安全地向下转型”
 
 dynamic_cast**用于类继承层次间的指针或引用转换**。主要还是用于执行“安全的向下转型（safe downcasting）”，也即是基类对象的指针或引用转换为同一继承层次的其他指针或引用。
 
-至于“先上转型”（即派生类指针或引用类型转换为其基类类型），本身就是安全的，尽管可以使用dynamic_cast进行转换，但这是没必要的， 普通的转换已经可以达到目的，**毕竟使用dynamic_cast是需要开销的**。
+至于“向上转型”（即派生类指针或引用类型转换为其基类类型）：
 
-对于“向下转型”有两种情况。
+- 本身就是安全的，尽管可以使用dynamic_cast进行转换，但这是没必要的。
+- 普通的转换已经可以达到目的，**毕竟使用dynamic_cast是需要开销的**。
 
-- 第一种是基类指针所指对象是派生类类型的，这种转换是安全的；
+对于“向下转型”有两种情况：
 
-- 第二种是基类指针所指对象为基类类型，在这种情况下dynamic_cast在运行时做检查，转换失败，返回结果为nullptr；
+- 基类指针所指对象是派生类类型的，这种转换是安全的。
+
+- 基类指针所指对象为基类类型，在这种情况下做运行时做检查，转换失败，返回结果为nullptr。
 
 与指针一样，引用的向下转型也可以分为两种情况，**与指针不同的是，并不存在空引用，所以引用的dynamic_cast检测失败时会抛出一个bad_cast异常：**
 
@@ -137,7 +147,7 @@ class Derived : public Base {};
 int main()
 {
     Base b1;
-	Derived* d1 = dynamic_cast<Derived*>(&b1);
+    Derived* d1 = dynamic_cast<Derived*>(&b1);
     if (d1 == nullptr) {
         std::cout << "d1 == nullptr" << std::endl;
     }
@@ -151,18 +161,19 @@ int main()
         std::cout << "d3 != nullptr" << std::endl;
     }
 
-	return 0;
+    return 0;
 }
 ```
 
 使用dynamic_cast转换的Base类至少带有一个虚函数, 当一个类中拥有至少一个虚函数的时候，编译器会为该类构建出一个虚函数表（virtual method table），虚函数表记录了虚函数的地址。如果该类派生了其他子类，且子类定义并实现了基类的虚函数，那么虚函数表会将该函数指向新的地址。虚表是C++多态实现的一个重要手段，也是dynamic_cast操作符转换能够进行的前提条件。当类没有虚函数表的时候（也即一个虚函数都没有定义）,dynamic_cast无法使用RTTI，不能通过编译。当然，虚函数表的建立对效率是有一定影响的，构建虚函数表、由表查询函数 都需要时间和空间上的消耗。所以，除了必须声明virtual（对于一个多态基类而言），不要轻易使用virtual函数。
 
-## const_cast
+## 3. const_cast
 
 const_cast 是用来强制去掉这种不能被修改的常数特性。不是去除变量的常量性，而是去除指向常数对象的指针或引用的常量性，对象必须为指针或引用。
 
-常量指针被转化成非常量指针，并且仍然指向原来的对象；
-常量引用被转换成非常量引用，并且仍然指向原来的对象；
+- 常量指针被转化成非常量指针，并且仍然指向原来的对象；
+
+- 常量引用被转换成非常量引用，并且仍然指向原来的对象；
 
 ```c++
 #include <iostream>
@@ -178,69 +189,6 @@ int main()
     return 0;
 }
 ```
-
-**请分析上述c++代码，请告诉我为什么a的值还是等于10?**
-
-上述C++代码中，`a` 是一个 `const int` 类型的常量，初始值为10。`p` 是一个指向 `const int` 的指针，指向 `a`。然后，通过 `const_cast` 将 `p` 转换为非 `const` 的指针 `q`，并尝试通过 `q` 修改 `a` 的值。
-
-尽管代码中通过 `q` 修改了 `*q` 的值为20，但 `a` 的值仍然是10。这是因为在C++中，`const` 变量的值在初始化后是不可修改的，即使通过 `const_cast` 去除了 `const` 属性，修改其值也不会影响到原始的 `const` 变量。
-
-具体分析如下：
-
-1. `const int a = 10;`：定义了一个 `const` 整型变量 `a`，初始值为10。
-2. `const int* p = &a;`：定义了一个指向 `const int` 的指针 `p`，指向 `a`。
-3. `int* q = const_cast<int*>(p);`：通过 `const_cast` 将 `p` 转换为非 `const` 的指针 `q`。
-4. `*q = 20;`：尝试通过 `q` 修改 `a` 的值为20。
-
-尽管 `*q` 被修改为20，但这并不会影响到 `a` 的值，因为 `a` 是一个 `const` 变量，其值在初始化后是不可修改的。编译器会确保 `const` 变量的值不会被修改，即使通过 `const_cast` 去除了 `const` 属性。
-
-可以看到，`a` 的值仍然是10，而 `*p` 和 `*q` 的值都是20。地址部分显示 `a`、`p` 和 `q` 都指向同一个内存地址。
-
-总结：`const` 变量的值在初始化后是不可修改的，即使通过 `const_cast` 去除了 `const` 属性，修改其值也不会影响到原始的 `const` 变量。
-
-**既然地址部分显示 a、p 和 q 都指向同一个内存地址，那么a的值为什么还是10?**
-
-虽然 `a`、`p` 和 `q` 都指向同一个内存地址，但 `a` 是一个 `const` 变量，其值在初始化后是不可修改的。编译器会确保 `const` 变量的值不会被修改，即使通过 `const_cast` 去除了 `const` 属性。
-
-具体来说，当你尝试通过 `q` 修改 `*q` 的值时，实际上是在修改内存中该地址的值。然而，这个修改并不会影响到 `a` 的值，因为 `a` 是一个 `const` 变量，编译器会确保 `a` 的值保持不变。
-
-在C++中，`const` 关键字用于定义常量，表示该变量的值在初始化后不可修改。编译器会为 `const` 变量分配内存，但会确保其值不会被修改。即使你通过 `const_cast` 去除了 `const` 属性并修改了内存中的值，这个修改也不会影响到 `const` 变量的值。
-
-总结来说，尽管 `a`、`p` 和 `q` 都指向同一个内存地址，但由于 `a` 是一个 `const` 变量，其值在初始化后是不可修改的，因此 `a` 的值仍然是10。
-
-**既然是同一个地址，且p 和 q 的值是20，那么a的值是如何保证还是10？ 因为 a、p 和 q 都指向同一个内存地址, 我理解是只要地址指向的值变化了，那么全部值都是一样的，应该全部都是20.**
-
-你提到的现象确实有些令人困惑，因为从表面上看，`a`、`p` 和 `q` 都指向同一个内存地址，理论上修改该地址的值应该会影响到所有指向该地址的变量。然而，C++ 的 `const` 关键字和编译器的行为确保了 `const` 变量的值不会被修改。
-
-让我们详细解释一下这个现象：
-
-1. **`const` 变量的语义**：
-   - 当你声明一个 `const` 变量时，编译器会确保该变量的值在初始化后不会被修改。这是通过编译时的检查和优化来实现的。
-   - 编译器可能会将 `const` 变量直接替换为其初始值，而不是为其分配内存。这种优化称为“常量折叠”（constant folding）。
-2. **`const_cast` 的行为**：
-   - `const_cast` 用于移除指针或引用的 `const` 属性，但它并不能改变原始变量的 `const` 属性。
-   - 当你使用 `const_cast` 移除 `const` 属性并修改指针指向的值时，这个修改是针对内存地址的，而不是针对原始的 `const` 变量。
-3. **编译器的行为**：
-   - 编译器可能会为 `const` 变量分配内存，但会确保其值不会被修改。即使你通过 `const_cast` 修改了内存中的值，这个修改也不会影响到 `const` 变量的值。
-   - 在某些情况下，编译器可能会直接将 `const` 变量的值替换为其初始值，而不是为其分配内存。这种情况下，修改内存中的值不会影响到 `const` 变量的值。
-
-具体到你的代码：
-
-```c++
-const int a = 10;
-const int* p = &a;
-int* q = const_cast<int*>(p);
-*q = 20;
-```
-
-- `a` 是一个 `const` 变量，初始值为10。
-- `p` 是一个指向 `const int` 的指针，指向 `a`。
-- `q` 是通过 `const_cast` 移除了 `const` 属性的指针，指向 `a`。
-- `*q = 20;` 修改了内存中该地址的值为20。
-
-尽管内存中的值被修改为20，但由于 `a` 是一个 `const` 变量，编译器会确保 `a` 的值保持不变。因此，`a` 的值仍然是10。
-
-总结来说，虽然 `a`、`p` 和 `q` 都指向同一个内存地址，但由于 `a` 是一个 `const` 变量，编译器会确保其值不会被修改。即使通过 `const_cast` 修改了内存中的值，这个修改也不会影响到 `const` 变量的值。这就是为什么 `a` 的值仍然是10的原因。
 
 ```c++
 #include <iostream>
@@ -279,11 +227,14 @@ int main()
 }
 ```
 
-## reinterpret_cast
+## 4. reinterpret_cast
 
 这个和C语言的强制转换没什么区别，只不过C++用自己的写法替代了C语言的强制转换而已。
+
 ①不同类型的指针之间的转换
+
 ②指针和能容纳指针的整数类型之间的转换（比如将int类型强转成int*类型）
+
 ③不同类型的引用之间的转换
-编译期处理执行的是逐字节复制的操作。
-类似于强制转换，至于强制转换会产生什么后果需要自己承担。
+
+编译期处理执行的是逐字节复制的操作。类似于强制转换，至于会产生什么后果需要自己承担。

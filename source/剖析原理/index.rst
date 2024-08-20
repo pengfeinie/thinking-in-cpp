@@ -2,7 +2,7 @@
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    0000_required_know/README
    0001_多态的实现原理/README

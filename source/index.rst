@@ -11,6 +11,7 @@ Welcome to thinking-in-cpp's documentation!
    :caption: Contents:
    
    剖析原理/index
+   案例分析/index
    about.rst
 
 Indices and tables

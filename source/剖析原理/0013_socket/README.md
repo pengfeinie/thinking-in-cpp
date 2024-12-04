@@ -142,7 +142,149 @@ int main() {
 
 这样，服务端可以更好地管理多个客户端连接，并且在发送数据时不会出现乱码或重复发送的问题。当一个客户端断开连接时，服务端能够正确处理并继续运行。
 
-## 2. 客户端代码 (`client.cpp`)
+### 2. 服务端代码 (`server.c`)
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <poll.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <pthread.h>
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+#define SEND_INTERVAL 1000  // 发送间隔时间，单位：毫秒
+#define MAX_CLIENTS 10
+
+pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+
+void* handleClient(void* arg) {
+    int clientSocket = *(int*)arg;
+    char buffer[BUFFER_SIZE];
+    while (1) {
+        // 发送数据到客户端
+        const char* message = "Hello from server!";
+        int bytesSent = send(clientSocket, message, strlen(message), 0);
+        if (bytesSent < 0) {
+            perror("Send failed");
+            break;  // 如果发送失败，退出线程
+        }
+        usleep(SEND_INTERVAL * 1000);  // 每隔SEND_INTERVAL毫秒发送一次
+    }
+    close(clientSocket);  // 关闭客户端socket
+    free(arg);  // 释放传递的参数内存
+    return NULL;
+}
+
+int main() {
+    int serverSocket, clientSocket;
+    struct sockaddr_in serverAddr, clientAddr;
+    socklen_t addrLen = sizeof(clientAddr);
+
+    // 创建socket
+    if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // 设置socket选项
+    int opt = 1;
+    if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+        perror("Setsockopt failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // 绑定socket
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    serverAddr.sin_port = htons(PORT);
+
+    if (bind(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
+        perror("Bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // 监听socket
+    if (listen(serverSocket, 3) < 0) {
+        perror("Listen failed");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Server is listening on port %d\n", PORT);
+
+    struct pollfd pollFds[MAX_CLIENTS + 1];
+    int clientSockets[MAX_CLIENTS];
+    int clientCount = 0;
+    pthread_t clientThreads[MAX_CLIENTS];
+
+    // 初始化pollFds
+    pollFds[0].fd = serverSocket;
+    pollFds[0].events = POLLIN;
+
+    while (1) {
+        // 使用poll来监听socket
+        int activity = poll(pollFds, clientCount + 1, -1);
+        if (activity < 0) {
+            perror("Poll error");
+            continue;
+        }
+
+        // 检查是否有新的连接
+        if (pollFds[0].revents & POLLIN) {
+            if ((clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddr, &addrLen)) < 0) {
+                perror("Accept failed");
+                continue;
+            }
+
+            printf("New client connected: %s:%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+
+            // 添加新的客户端到pollFds和clientSockets
+            if (clientCount < MAX_CLIENTS) {
+                int* clientSocketPtr = (int*)malloc(sizeof(int));
+                *clientSocketPtr = clientSocket;
+                pollFds[clientCount + 1].fd = clientSocket;
+                pollFds[clientCount + 1].events = POLLOUT;
+                clientSockets[clientCount] = clientSocket;
+                clientCount++;
+
+                // 为每个客户端创建一个线程来处理发送任务
+                pthread_create(&clientThreads[clientCount - 1], NULL, handleClient, clientSocketPtr);
+            } else {
+                printf("Max clients reached, connection rejected\n");
+                close(clientSocket);
+            }
+        }
+
+        // 处理所有客户端的断开连接事件
+        for (int i = 1; i <= clientCount; ++i) {
+            if (pollFds[i].revents & (POLLHUP | POLLERR)) {
+                printf("Client disconnected: %d\n", clientSockets[i - 1]);
+                close(pollFds[i].fd);
+                for (int j = i; j < clientCount; ++j) {
+                    pollFds[j] = pollFds[j + 1];
+                    clientSockets[j - 1] = clientSockets[j];
+                }
+                clientCount--;
+            }
+        }
+    }
+
+    // 等待所有客户端线程结束
+    for (int i = 0; i < clientCount; ++i) {
+        pthread_join(clientThreads[i], NULL);
+    }
+
+    close(serverSocket);
+    return 0;
+}
+```
+
+## 3. 客户端代码 (`client.cpp`)
 
 ```c++
 #include <iostream>
@@ -199,14 +341,14 @@ int main() {
 }
 ```
 
-
-
-### 3. 编译和运行
+### 4. 编译和运行
 
 **编译服务端代码**:
 
 ```
 g++ -o server server.cpp -pthread
+or
+gcc -o server server.c -pthread
 ```
 
 **编译客户端代码**:
